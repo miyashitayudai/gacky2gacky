@@ -1,0 +1,62 @@
+javascript: (function() {
+    var num = 0;
+    var rg_metas = document.getElementsByClassName("rg_meta");
+    for (var i = 0; i < rg_metas.length; i++) {
+        getImage(rg_metas[i])
+    }
+    var mo = new MutationObserver(function(records) {
+        records.forEach(function(record) {
+            if (record.type === "childList") {
+                for (var i = 0; i < record.addedNodes.length; i++) {
+                    if (record.addedNodes[i].nodeName === "DIV") {
+                        var div = record.addedNodes[i];
+                        var rgs = div.getElementsByClassName("rg_meta");
+                        if (rgs.length > 0) {
+                            for (var j = 0; j < rgs.length; j++) {
+                                getImage(rgs[j])
+                            }
+                        }
+                    }
+                }
+            }
+        })
+    });
+    mo.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+
+    function getImage(meta) {
+        var ext = "jpg";
+        var url = "";
+        var w;
+        var h;
+        JSON.parse(meta.innerHTML, function(key, value) {
+            switch (key) {
+                case "ou":
+                    url = value;
+                    break;
+                case "ow":
+                    w = value;
+                    break;
+                case "oh":
+                    h = value;
+                    break;
+                case "ity":
+                    ext = value;
+                    break
+            }
+        });
+        if (url !== "" && w > 255 && h > 255 && ext !== "gif") {
+            downloadImage(url, "images_" + num + "." + ext);
+            num++
+        }
+    }
+
+    function downloadImage(url, filename) {
+        var a = document.createElement("a");
+        a.download = filename;
+        a.href = url;
+        a.click()
+    }
+})();
